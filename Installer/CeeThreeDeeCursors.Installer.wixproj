@@ -1,0 +1,9 @@
+<Project Sdk="WixToolset.Sdk/4.0.5">
+  <PropertyGroup>
+    <OutputName>CeeThreeDeeCursors-Installer</OutputName>
+    <OutputPath>$(MSBuildProjectDirectory)\..\artifacts\installer\</OutputPath>
+    <AppPublishDir Condition="'$(AppPublishDir)' == ''">$(MSBuildProjectDirectory)\..\artifacts\publish</AppPublishDir>
+    <AppVersion Condition="'$(AppVersion)' == ''">1.0.0</AppVersion>
+    <DefineConstants>AppPublishDir=$(AppPublishDir);AppVersion=$(AppVersion)</DefineConstants>
+  </PropertyGroup>
+</Project>

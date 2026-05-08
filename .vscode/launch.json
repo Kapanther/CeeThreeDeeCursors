@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run CeeThreeDeeCursors",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/CeeThreeDeeCursors/bin/Debug/net8.0-windows/CeeThreeDeeCursors.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/CeeThreeDeeCursors",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach"
+        }
+    ]
+}

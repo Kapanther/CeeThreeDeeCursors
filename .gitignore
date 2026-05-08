@@ -1,0 +1,27 @@
+## Visual Studio / .NET
+.vs/
+obj/
+bin/
+*.user
+*.suo
+*.userosscache
+*.sln.docview
+*.ncrunchsolution
+
+## NuGet
+packages/
+*.nupkg
+.nuget/
+
+## OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+## Published output
+publish/
+
+## Installer output
+artifacts/
+Installer/GeneratedFiles.wxs

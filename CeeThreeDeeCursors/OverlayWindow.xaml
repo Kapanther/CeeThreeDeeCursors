@@ -1,0 +1,16 @@
+<Window x:Class="CeeThreeDeeCursors.OverlayWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="CeeThreeDeeCursors Overlay"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False"
+        IsHitTestVisible="False"
+        SizeChanged="OnSizeChanged">
+    <Grid Background="Transparent">
+        <Canvas x:Name="CrosshairCanvas" Background="Transparent"/>
+    </Grid>
+</Window>

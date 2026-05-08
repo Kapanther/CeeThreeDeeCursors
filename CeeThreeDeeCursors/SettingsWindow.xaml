@@ -1,0 +1,252 @@
+<Window x:Class="CeeThreeDeeCursors.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="CeeThreeDeeCursors – Settings"
+        Width="420" Height="660"
+        ResizeMode="NoResize"
+        Closing="OnWindowClosing"
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen"
+        Background="#1E1E2E"
+        Foreground="White"
+        FontFamily="Segoe UI"
+        FontSize="13">
+
+    <Window.Resources>
+        <!-- Dark theme system color overrides (fixes ComboBox popup background) -->
+        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}"       Color="#313244"/>
+        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}"   Color="White"/>
+        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"    Color="#89B4FA"/>
+        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#1E1E2E"/>
+        <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}"      Color="#313244"/>
+        <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}"  Color="White"/>
+        <SolidColorBrush x:Key="{x:Static SystemColors.GrayTextBrushKey}"     Color="#F8FAFC"/>
+        <Style TargetType="Label">
+            <Setter Property="Foreground" Value="#CDD6F4"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Foreground" Value="#111827"/>
+            <Setter Property="BorderBrush" Value="#585B70"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="TextElement.Foreground" Value="#111827"/>
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="Background" Value="#FFFFFF"/>
+                        <Setter Property="Foreground" Value="#111827"/>
+                        <Setter Property="Padding" Value="6,4"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter Property="Background" Value="#89B4FA"/>
+                                <Setter Property="Foreground" Value="#1E1E2E"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#BFDBFE"/>
+                                <Setter Property="Foreground" Value="#111827"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="Slider">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#CDD6F4"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#313244"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#585B70"/>
+            <Setter Property="Padding" Value="4,2"/>
+        </Style>
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="#89B4FA"/>
+            <Setter Property="Foreground" Value="#1E1E2E"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="16,6"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style x:Key="SecondaryButton" TargetType="Button">
+            <Setter Property="Background" Value="#585B70"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="16,6"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style x:Key="HeaderButton" TargetType="Button">
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Background" Value="#313244"/>
+            <Setter Property="Foreground" Value="#F8FAFC"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </Window.Resources>
+
+    <Border BorderBrush="#585B70" BorderThickness="1" CornerRadius="8" Background="#1E1E2E">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="34"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="30"/>
+            </Grid.RowDefinitions>
+
+            <!-- Custom title bar -->
+            <Grid Grid.Row="0" Background="#181825" MouseLeftButtonDown="OnTopBarMouseDown">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="34"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="CeeThreeDeeCursors – Settings" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="#CDD6F4" FontWeight="SemiBold"/>
+                <Button Grid.Column="1" Content="X" Style="{StaticResource HeaderButton}" Click="OnCloseWindowClicked" Margin="2"/>
+            </Grid>
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="20,14,20,14">
+                    <!-- Header -->
+                    <TextBlock Text="C3D Cursors" FontSize="20" FontWeight="Bold" Foreground="#89B4FA" Margin="0,0,0,12"/>
+
+                    <Button x:Name="ToggleCrosshairButton"
+                            Content="Show Crosshair"
+                            Style="{StaticResource PrimaryButton}"
+                            HorizontalAlignment="Left"
+                            Margin="0,0,0,12"
+                            Click="OnToggleCrosshairClicked"/>
+
+                    <!-- Crosshair Style -->
+                    <Grid Margin="0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="Crosshair Style" VerticalAlignment="Top" Margin="0,4,0,0"/>
+                        <UniformGrid x:Name="StyleGridPanel" Grid.Column="1" Columns="3" Margin="0,0,0,0"/>
+                    </Grid>
+
+                    <!-- Color -->
+                    <Grid Margin="0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="96"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="Color"/>
+                        <Border x:Name="ColorPreviewBox" Grid.Column="1" Height="26" CornerRadius="4" BorderBrush="#585B70" BorderThickness="1"/>
+                        <Button Grid.Column="2" Content="Pick Color" Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Padding="8,2" Click="OnPickColor"/>
+                    </Grid>
+
+                    <Grid Margin="0,4">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="140"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                        <Label Content="Color Hex"/>
+                        <TextBox x:Name="ColorHexBox" Grid.Column="1" IsReadOnly="True"/>
+                    </Grid>
+
+                    <!-- Size -->
+                    <Grid Margin="0,4">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="140"/><ColumnDefinition/><ColumnDefinition Width="36"/></Grid.ColumnDefinitions>
+            <Label Content="Size (arm length)"/>
+            <Slider x:Name="SizeSlider" Grid.Column="1" Minimum="2" Maximum="60" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="OnPreviewChanged"/>
+            <TextBlock x:Name="SizeLabel" Grid.Column="2" VerticalAlignment="Center" Foreground="#CDD6F4" Margin="4,0"/>
+                    </Grid>
+
+                    <!-- Gap -->
+                    <Grid Margin="0,4">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="140"/><ColumnDefinition/><ColumnDefinition Width="36"/></Grid.ColumnDefinitions>
+            <Label Content="Center Gap"/>
+            <Slider x:Name="GapSlider" Grid.Column="1" Minimum="0" Maximum="20" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="OnPreviewChanged"/>
+            <TextBlock x:Name="GapLabel" Grid.Column="2" VerticalAlignment="Center" Foreground="#CDD6F4" Margin="4,0"/>
+                    </Grid>
+
+                    <!-- Thickness -->
+                    <Grid Margin="0,4">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="140"/><ColumnDefinition/><ColumnDefinition Width="36"/></Grid.ColumnDefinitions>
+            <Label Content="Thickness"/>
+            <Slider x:Name="ThicknessSlider" Grid.Column="1" Minimum="0.5" Maximum="10" TickFrequency="0.5" IsSnapToTickEnabled="True" ValueChanged="OnPreviewChanged"/>
+            <TextBlock x:Name="ThicknessLabel" Grid.Column="2" VerticalAlignment="Center" Foreground="#CDD6F4" Margin="4,0"/>
+                    </Grid>
+
+                    <!-- Dot Radius -->
+                    <Grid Margin="0,4">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="140"/><ColumnDefinition/><ColumnDefinition Width="36"/></Grid.ColumnDefinitions>
+            <Label Content="Dot Radius"/>
+            <Slider x:Name="DotSlider" Grid.Column="1" Minimum="1" Maximum="15" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="OnPreviewChanged"/>
+            <TextBlock x:Name="DotLabel" Grid.Column="2" VerticalAlignment="Center" Foreground="#CDD6F4" Margin="4,0"/>
+                    </Grid>
+
+                    <!-- Opacity -->
+                    <Grid Margin="0,4">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="140"/><ColumnDefinition/><ColumnDefinition Width="36"/></Grid.ColumnDefinitions>
+            <Label Content="Opacity"/>
+            <Slider x:Name="OpacitySlider" Grid.Column="1" Minimum="0.1" Maximum="1.0" TickFrequency="0.05" IsSnapToTickEnabled="True" ValueChanged="OnPreviewChanged"/>
+            <TextBlock x:Name="OpacityLabel" Grid.Column="2" VerticalAlignment="Center" Foreground="#CDD6F4" Margin="4,0"/>
+                    </Grid>
+
+                    <!-- Outline -->
+                    <Grid Margin="0,4">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="140"/><ColumnDefinition/></Grid.ColumnDefinitions>
+            <Label Content="Outline"/>
+            <CheckBox x:Name="OutlineCheck" Grid.Column="1" Checked="OnPreviewChanged" Unchecked="OnPreviewChanged"/>
+                    </Grid>
+
+                    <!-- Monitor -->
+                    <Grid Margin="0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="Monitor" VerticalAlignment="Top" Margin="0,4,0,0"/>
+                        <UniformGrid x:Name="MonitorGridPanel" Grid.Column="1" Columns="3" Margin="0,0,0,0"/>
+                    </Grid>
+
+                    <!-- Offset X -->
+                    <Grid Margin="0,4">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="140"/><ColumnDefinition/><ColumnDefinition Width="36"/></Grid.ColumnDefinitions>
+            <Label Content="Offset X"/>
+            <Slider x:Name="OffsetXSlider" Grid.Column="1" Minimum="-200" Maximum="200" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="OnPreviewChanged"/>
+            <TextBlock x:Name="OffsetXLabel" Grid.Column="2" VerticalAlignment="Center" Foreground="#CDD6F4" Margin="4,0"/>
+                    </Grid>
+
+                    <!-- Offset Y -->
+                    <Grid Margin="0,4">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="140"/><ColumnDefinition/><ColumnDefinition Width="36"/></Grid.ColumnDefinitions>
+            <Label Content="Offset Y"/>
+            <Slider x:Name="OffsetYSlider" Grid.Column="1" Minimum="-200" Maximum="200" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="OnPreviewChanged"/>
+            <TextBlock x:Name="OffsetYLabel" Grid.Column="2" VerticalAlignment="Center" Foreground="#CDD6F4" Margin="4,0"/>
+                    </Grid>
+
+                    <!-- Toggle Hotkey -->
+                    <Grid Margin="0,4">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="140"/><ColumnDefinition/></Grid.ColumnDefinitions>
+            <Label Content="Toggle Hotkey"/>
+            <TextBox x:Name="HotkeyBox" Grid.Column="1" ToolTip="Format: Modifier+Key e.g. Shift+F9, Ctrl+F1, F5"/>
+                    </Grid>
+
+                    <!-- Settings Hotkey -->
+                    <Grid Margin="0,4">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="140"/><ColumnDefinition/></Grid.ColumnDefinitions>
+            <Label Content="Settings Hotkey"/>
+            <TextBox x:Name="SettingsHotkeyBox" Grid.Column="1" ToolTip="Format: Modifier+Key e.g. Shift+F10"/>
+                    </Grid>
+
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Footer -->
+            <TextBlock Grid.Row="2"
+                       x:Name="VersionText"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Foreground="#7F849C"
+                       FontSize="11"
+                       Text="v1.0.0 (Built For Louie K)"/>
+        </Grid>
+    </Border>
+</Window>

@@ -1,0 +1,77 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package
+    Name="CeeThreeDeeCursors"
+    Manufacturer="CeeThreeDee"
+    Version="$(var.AppVersion)"
+    UpgradeCode="F57F868A-177B-4EE4-8EC8-B22A9730D38E"
+    Scope="perUser">
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Icon Id="AppIcon" SourceFile="..\CeeThreeDeeCursors\Resources\crosshair.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon" />
+
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="INSTALLFOLDER" Name="CeeThreeDeeCursors">
+        <Component Id="AppExeComponent" Guid="7D1B0D9A-80F7-4532-BBA2-4B73C18E0D4F">
+          <File Id="AppExeFile" Source="$(var.AppPublishDir)\CeeThreeDeeCursors.exe" />
+          <RegistryValue Root="HKCU" Key="Software\CeeThreeDee\CeeThreeDeeCursors" Name="AppExe" Type="integer" Value="1" KeyPath="yes" />
+        </Component>
+
+        <Component Id="InstallFolderCleanupComponent" Guid="*">
+          <RemoveFolder Id="RemoveInstallFolder" On="uninstall" />
+          <RegistryValue Root="HKCU" Key="Software\CeeThreeDee\CeeThreeDeeCursors" Name="InstallFolder" Type="integer" Value="1" KeyPath="yes" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder">
+      <Component Id="DesktopShortcutComponent" Guid="*">
+        <Shortcut
+          Id="DesktopShortcut"
+          Name="CeeThreeDeeCursors"
+          Description="CeeThreeDee crosshair overlay"
+          Target="[INSTALLFOLDER]CeeThreeDeeCursors.exe"
+          WorkingDirectory="INSTALLFOLDER"
+          Icon="AppIcon" />
+        <RegistryValue Root="HKCU" Key="Software\CeeThreeDee\CeeThreeDeeCursors" Name="Installed" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ProgramMenuC3D" Name="CeeThreeDeeCursors">
+        <Component Id="StartMenuShortcutComponent" Guid="*">
+          <Shortcut
+            Id="StartMenuShortcut"
+            Name="CeeThreeDeeCursors"
+            Description="CeeThreeDee crosshair overlay"
+            Target="[INSTALLFOLDER]CeeThreeDeeCursors.exe"
+            WorkingDirectory="INSTALLFOLDER"
+            Icon="AppIcon" />
+          <RemoveFolder Id="ProgramMenuC3D" On="uninstall" />
+          <RegistryValue Root="HKCU" Key="Software\CeeThreeDee\CeeThreeDeeCursors" Name="StartMenu" Type="integer" Value="1" KeyPath="yes" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+
+    <CustomAction
+      Id="LaunchInstalledApp"
+      FileRef="AppExeFile"
+      ExeCommand=""
+      Return="asyncNoWait"
+      Impersonate="yes" />
+
+    <InstallExecuteSequence>
+      <Custom Action="LaunchInstalledApp" After="InstallFinalize" Condition="NOT Installed AND NOT REMOVE" />
+    </InstallExecuteSequence>
+
+    <Feature Id="MainFeature" Title="CeeThreeDeeCursors" Level="1">
+      <ComponentRef Id="AppExeComponent" />
+      <ComponentGroupRef Id="AppFilesGroup" />
+      <ComponentRef Id="InstallFolderCleanupComponent" />
+      <ComponentRef Id="DesktopShortcutComponent" />
+      <ComponentRef Id="StartMenuShortcutComponent" />
+    </Feature>
+  </Package>
+</Wix>
