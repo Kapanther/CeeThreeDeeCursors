@@ -93,6 +93,20 @@
                 "-Part",
                 "major"
             ]
+        },
+        {
+            "label": "release-dispatch",
+            "type": "process",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/trigger-release.ps1",
+                "-Ref",
+                "main"
+            ]
         }
     ]
 }
