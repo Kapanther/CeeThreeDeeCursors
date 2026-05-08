@@ -1,0 +1,88 @@
+name: Build And Release MSI
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (optional, e.g. v1.1.0). If empty, version is read from csproj"
+        required: false
+        type: string
+      prerelease:
+        description: "Mark release as prerelease"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Resolve release tag
+        id: tag
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "push") {
+            $tag = "${{ github.ref_name }}"
+          }
+          elseif (-not [string]::IsNullOrWhiteSpace("${{ inputs.tag }}")) {
+            $tag = "${{ inputs.tag }}"
+          }
+          else {
+            [xml]$proj = Get-Content "CeeThreeDeeCursors/CeeThreeDeeCursors.csproj"
+            $version = $proj.Project.PropertyGroup.Version | Select-Object -First 1
+            if ([string]::IsNullOrWhiteSpace($version)) {
+              $version = "1.0.0"
+            }
+            $tag = "v$version"
+          }
+
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+          Write-Host "Using release tag: $tag"
+
+      - name: Build installer
+        shell: pwsh
+        run: |
+          ./build-installer.ps1 -Configuration Release
+
+      - name: Locate MSI
+        id: msi
+        shell: pwsh
+        run: |
+          $msi = Get-ChildItem "artifacts/installer" -Filter "CeeThreeDeeCursorsV*.msi" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $msi) {
+            throw "MSI not found in artifacts/installer"
+          }
+
+          "msi_path=$($msi.FullName)" >> $env:GITHUB_OUTPUT
+          "msi_name=$($msi.Name)" >> $env:GITHUB_OUTPUT
+          Write-Host "Found MSI: $($msi.FullName)"
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.msi.outputs.msi_name }}
+          path: ${{ steps.msi.outputs.msi_path }}
+
+      - name: Create GitHub release and upload MSI
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          generate_release_notes: true
+          prerelease: ${{ github.event_name == 'workflow_dispatch' && inputs.prerelease || false }}
+          files: ${{ steps.msi.outputs.msi_path }}
