@@ -59,8 +59,8 @@ Set-Content -Path $generatedWxs -Value $wxs -Encoding UTF8
 Write-Host "Building MSI installer..."
 dotnet build $installerProject -c $Configuration -p:AppPublishDir=$publishDir -p:AppVersion=$appVersion
 
-# Rename MSI to include major/minor version as V#.## (e.g., CeeThreeDeeCursorsV1.00.msi)
-$versionTag = "{0}.{1:00}" -f $assemblyVersion.Major, $assemblyVersion.Minor
+# Rename MSI to include semantic version as V#.#.# (e.g., CeeThreeDeeCursorsV1.2.0.msi)
+$versionTag = $appVersion
 
 $defaultMsi = Join-Path $installerDir "CeeThreeDeeCursors-Installer.msi"
 $versionedMsi = Join-Path $installerDir ("CeeThreeDeeCursorsV{0}.msi" -f $versionTag)

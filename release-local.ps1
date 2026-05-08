@@ -32,9 +32,21 @@ else {
     & $buildInstallerScript -Configuration $Configuration
 }
 
-$msi = Get-ChildItem -Path $installerDir -Filter "CeeThreeDeeCursorsV*.msi" |
-    Sort-Object LastWriteTime -Descending |
-    Select-Object -First 1
+$tagVersion = $Tag.TrimStart('v', 'V')
+$preferredMsi = Join-Path $installerDir ("CeeThreeDeeCursorsV{0}.msi" -f $tagVersion)
+
+$msi = $null
+if (Test-Path $preferredMsi) {
+    $msi = Get-Item $preferredMsi
+}
+else {
+    $msi = Get-ChildItem -Path $installerDir -Filter "CeeThreeDeeCursorsV*.msi" |
+        Sort-Object LastWriteTime -Descending |
+        Select-Object -First 1
+    if ($msi) {
+        Write-Warning "Preferred MSI for tag $Tag not found at $preferredMsi. Falling back to latest MSI: $($msi.Name)"
+    }
+}
 
 if (-not $msi) {
     throw "No versioned MSI found in $installerDir"
@@ -45,9 +57,15 @@ Write-Host "Target release tag: $Tag"
 
 $releaseExists = $false
 if (-not $DryRun) {
-    gh release view $Tag *> $null
-    if ($LASTEXITCODE -eq 0) {
-        $releaseExists = $true
+    $previousPreference = $ErrorActionPreference
+    try {
+        # gh writes 'release not found' to stderr for missing tags; treat that as a normal non-existent release check.
+        $ErrorActionPreference = "Continue"
+        & gh release view $Tag 1> $null 2> $null
+        $releaseExists = ($LASTEXITCODE -eq 0)
+    }
+    finally {
+        $ErrorActionPreference = $previousPreference
     }
 }
 
