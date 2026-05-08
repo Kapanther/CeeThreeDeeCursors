@@ -107,6 +107,20 @@
                 "-Ref",
                 "main"
             ]
+        },
+        {
+            "label": "release-local",
+            "type": "process",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/release-local.ps1",
+                "-Configuration",
+                "Release"
+            ]
         }
     ]
 }

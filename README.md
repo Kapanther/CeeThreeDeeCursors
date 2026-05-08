@@ -132,6 +132,43 @@ Alternative trigger:
 
 - Push a tag that starts with `v` (example: `v1.1.0`) and it runs automatically.
 
+## One-Click Local Release (No Waiting For Actions)
+
+If you want to publish immediately from your machine, use the local release script.
+
+Script:
+
+- [release-local.ps1](release-local.ps1)
+
+What it does:
+
+1. Builds the MSI locally using `build-installer.ps1`
+2. Finds the latest `CeeThreeDeeCursorsV*.msi`
+3. Creates a GitHub Release for the current app tag (or updates existing)
+4. Uploads the MSI asset (replaces existing asset with `--clobber`)
+
+Prerequisites:
+
+- GitHub CLI installed (`gh`)
+- Authenticated once: `gh auth login`
+
+Run manually:
+
+```powershell
+cd D:\ceethreedee\CeeThreeDeeCursors
+.\release-local.ps1 -Configuration Release
+```
+
+Dry run (no upload):
+
+```powershell
+.\release-local.ps1 -DryRun
+```
+
+VS Code task:
+
+- `release-local`
+
 ## Project Structure
 
 - `CeeThreeDeeCursors/` - main WPF app
