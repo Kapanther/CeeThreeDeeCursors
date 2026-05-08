@@ -60,6 +60,8 @@ public partial class OverlayWindow : Window
 
     private HwndSource? _hwndSource;
     private CrosshairSettings _settings;
+    private string _registeredToggleHotkey = string.Empty;
+    private string _registeredSettingsHotkey = string.Empty;
 
     public OverlayWindow(CrosshairSettings settings)
     {
@@ -71,7 +73,17 @@ public partial class OverlayWindow : Window
 
     public void ApplySettings(CrosshairSettings settings)
     {
+        bool hotkeysChanged = !string.Equals(_settings.ToggleHotkey, settings.ToggleHotkey, StringComparison.OrdinalIgnoreCase)
+            || !string.Equals(_settings.SettingsHotkey, settings.SettingsHotkey, StringComparison.OrdinalIgnoreCase);
+
         _settings = settings;
+
+        if (hotkeysChanged)
+        {
+            var helper = new WindowInteropHelper(this);
+            ReRegisterHotkeys(helper.Handle);
+        }
+
         PositionOnMonitor();
         DrawCrosshair();
     }
@@ -90,7 +102,7 @@ public partial class OverlayWindow : Window
         _hwndSource = HwndSource.FromHwnd(hwnd);
         _hwndSource?.AddHook(WndProc);
 
-        RegisterHotkeys(hwnd);
+        ReRegisterHotkeys(hwnd);
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -270,19 +282,40 @@ public partial class OverlayWindow : Window
 
     // ── Hotkey ───────────────────────────────────────────────────────────────
 
-    private void RegisterHotkeys(IntPtr hwnd)
+    private void ReRegisterHotkeys(IntPtr hwnd)
     {
-        var (mods1, vk1) = ParseHotkey(_settings.ToggleHotkey);
-        if (vk1 != 0) RegisterHotKey(hwnd, HOTKEY_TOGGLE_ID, mods1, vk1);
+        UnregisterHotKey(hwnd, HOTKEY_TOGGLE_ID);
+        UnregisterHotKey(hwnd, HOTKEY_SETTINGS_ID);
+        _registeredToggleHotkey = string.Empty;
+        _registeredSettingsHotkey = string.Empty;
 
-        var (mods2, vk2) = ParseHotkey(_settings.SettingsHotkey);
-        if (vk2 != 0) RegisterHotKey(hwnd, HOTKEY_SETTINGS_ID, mods2, vk2);
+        if (TryParseHotkey(_settings.ToggleHotkey, out uint mods1, out uint vk1))
+        {
+            if (RegisterHotKey(hwnd, HOTKEY_TOGGLE_ID, mods1, vk1))
+            {
+                _registeredToggleHotkey = _settings.ToggleHotkey;
+            }
+        }
+
+        bool settingsConflictsWithToggle = string.Equals(_settings.SettingsHotkey, _registeredToggleHotkey, StringComparison.OrdinalIgnoreCase);
+        if (!settingsConflictsWithToggle && TryParseHotkey(_settings.SettingsHotkey, out uint mods2, out uint vk2))
+        {
+            if (RegisterHotKey(hwnd, HOTKEY_SETTINGS_ID, mods2, vk2))
+            {
+                _registeredSettingsHotkey = _settings.SettingsHotkey;
+            }
+        }
     }
 
-    private static (uint mods, uint vk) ParseHotkey(string hotkeyStr)
+    private static bool TryParseHotkey(string hotkeyStr, out uint mods, out uint vk)
     {
-        uint mods = 0;
-        var parts = hotkeyStr.Split('+');
+        mods = 0;
+        vk = 0;
+
+        var parts = hotkeyStr.Split('+', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (parts.Length == 0)
+            return false;
+
         foreach (var part in parts.Take(parts.Length - 1))
         {
             switch (part.Trim().ToLowerInvariant())
@@ -291,12 +324,16 @@ public partial class OverlayWindow : Window
                 case "ctrl":
                 case "control": mods |= MOD_CONTROL; break;
                 case "alt":     mods |= MOD_ALT;     break;
+                default: return false;
             }
         }
+
         string keyName = parts.Last().Trim();
-        if (Enum.TryParse<Key>(keyName, out var key))
-            return (mods, (uint)KeyInterop.VirtualKeyFromKey(key));
-        return (0, 0);
+        if (!Enum.TryParse<Key>(keyName, ignoreCase: true, out var key) || key == Key.None)
+            return false;
+
+        vk = (uint)KeyInterop.VirtualKeyFromKey(key);
+        return vk != 0;
     }
 
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)

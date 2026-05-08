@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Threading;
 using Application = System.Windows.Application;
 using CeeThreeDeeCursors.Models;
 using CeeThreeDeeCursors.Services;
@@ -7,6 +8,8 @@ namespace CeeThreeDeeCursors;
 
 public partial class App : Application
 {
+    private const string SingleInstanceMutexName = @"Local\CeeThreeDeeCursors.SingleInstance";
+    private Mutex? _singleInstanceMutex;
     private System.Windows.Forms.NotifyIcon? _trayIcon;
     private System.Windows.Forms.ToolStripMenuItem? _toggleMenuItem;
     private OverlayWindow? _overlay;
@@ -14,6 +17,15 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        _singleInstanceMutex = new Mutex(initiallyOwned: true, name: SingleInstanceMutexName, createdNew: out bool createdNew);
+        if (!createdNew)
+        {
+            _singleInstanceMutex.Dispose();
+            _singleInstanceMutex = null;
+            Shutdown();
+            return;
+        }
+
         base.OnStartup(e);
 
         _settings = SettingsService.Load();
@@ -192,6 +204,14 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         _trayIcon?.Dispose();
+
+        if (_singleInstanceMutex != null)
+        {
+            _singleInstanceMutex.ReleaseMutex();
+            _singleInstanceMutex.Dispose();
+            _singleInstanceMutex = null;
+        }
+
         base.OnExit(e);
     }
 }

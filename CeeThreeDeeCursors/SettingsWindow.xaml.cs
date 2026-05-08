@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using Brush = System.Windows.Media.Brush;
@@ -372,8 +373,102 @@ public partial class SettingsWindow : Window
 
     private void OnWindowClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
+        if (!TryNormalizeHotkey(HotkeyBox.Text, out string normalizedToggle))
+        {
+            System.Windows.MessageBox.Show(this, "Toggle hotkey is invalid. Use formats like F9, Shift+F9, or Ctrl+Alt+H.", "Invalid Hotkey", MessageBoxButton.OK, MessageBoxImage.Warning);
+            e.Cancel = true;
+            return;
+        }
+
+        if (!TryNormalizeHotkey(SettingsHotkeyBox.Text, out string normalizedSettings))
+        {
+            System.Windows.MessageBox.Show(this, "Settings hotkey is invalid. Use formats like F10, Shift+F10, or Ctrl+Alt+S.", "Invalid Hotkey", MessageBoxButton.OK, MessageBoxImage.Warning);
+            e.Cancel = true;
+            return;
+        }
+
+        if (string.Equals(normalizedToggle, normalizedSettings, StringComparison.OrdinalIgnoreCase))
+        {
+            System.Windows.MessageBox.Show(this, "Toggle and Settings hotkeys must be different.", "Hotkey Conflict", MessageBoxButton.OK, MessageBoxImage.Warning);
+            e.Cancel = true;
+            return;
+        }
+
+        HotkeyBox.Text = normalizedToggle;
+        SettingsHotkeyBox.Text = normalizedSettings;
+
         // Treat close as Save.
         Result = BuildFromControls();
+    }
+
+    private void OnHotkeyBoxPreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.TextBox box) return;
+
+        // Ignore modifier-only presses.
+        Key key = e.Key == Key.System ? e.SystemKey : e.Key;
+        if (key is Key.LeftCtrl or Key.RightCtrl or Key.LeftAlt or Key.RightAlt or Key.LeftShift or Key.RightShift)
+            return;
+
+        bool ctrl = (Keyboard.Modifiers & ModifierKeys.Control) != 0;
+        bool alt = (Keyboard.Modifiers & ModifierKeys.Alt) != 0;
+        bool shift = (Keyboard.Modifiers & ModifierKeys.Shift) != 0;
+
+        var parts = new List<string>();
+        if (ctrl) parts.Add("Ctrl");
+        if (alt) parts.Add("Alt");
+        if (shift) parts.Add("Shift");
+        parts.Add(key.ToString());
+
+        box.Text = string.Join("+", parts);
+        box.CaretIndex = box.Text.Length;
+
+        e.Handled = true;
+
+        if (!_loading)
+        {
+            _onPreview(BuildFromControls());
+        }
+    }
+
+    private static bool TryNormalizeHotkey(string input, out string normalized)
+    {
+        normalized = string.Empty;
+
+        var parts = input.Split('+', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (parts.Length == 0) return false;
+
+        uint mods = 0;
+        for (int i = 0; i < parts.Length - 1; i++)
+        {
+            switch (parts[i].ToLowerInvariant())
+            {
+                case "ctrl":
+                case "control":
+                    mods |= 0b001;
+                    break;
+                case "alt":
+                    mods |= 0b010;
+                    break;
+                case "shift":
+                    mods |= 0b100;
+                    break;
+                default:
+                    return false;
+            }
+        }
+
+        if (!Enum.TryParse<Key>(parts[^1], ignoreCase: true, out Key key) || key == Key.None)
+            return false;
+
+        var output = new List<string>();
+        if ((mods & 0b001) != 0) output.Add("Ctrl");
+        if ((mods & 0b010) != 0) output.Add("Alt");
+        if ((mods & 0b100) != 0) output.Add("Shift");
+        output.Add(key.ToString());
+
+        normalized = string.Join("+", output);
+        return true;
     }
 
     private static Color ParseWpfColor(string hex)
